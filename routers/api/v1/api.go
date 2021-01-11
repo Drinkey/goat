@@ -40,7 +40,7 @@ func RunOneTask(c *gin.Context) {
 		return
 	}
 	cron.CronTab.Parse()
-	task := cron.CronTab.FindTaskById(id)
+	task := cron.CronTab.FindTaskByID(id)
 	go func() {
 		log.Print("task created")
 		services.Execute(id, task.Command)

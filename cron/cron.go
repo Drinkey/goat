@@ -10,23 +10,26 @@ import (
 
 	"github.com/Drinkey/goat/commando"
 	"github.com/Drinkey/goat/pkg/utils"
+	"github.com/gorhill/cronexpr"
 )
 
 const cronFileDir = "/var/spool/cron/crontabs"
 
-// CronTab is a global singleton stores crontab info
+// CronTab is a global singleton object
 var CronTab Cron
 
 // Task represents one task of crontab
 type Task struct {
-	ID         int    `json:"id"`
-	Schedule   string `json:"schedule"`
-	Command    string `json:"command"`
-	LastResult string `json:"last_result"`
-	NextRun    string `json:"next_run_at"`
-	Status     string `json:"status"`
+	ID               int       `json:"id"`
+	Schedule         string    `json:"schedule"`
+	ScheduleReadable string    `json:"schedule_readable"`
+	Command          string    `json:"command"`
+	LastResult       string    `json:"last_result"`
+	NextRun          time.Time `json:"next_run"`
+	Status           string    `json:"status"`
 }
 
+// Load reads the execution report of current task
 func (t *Task) Load() {
 	report := commando.Report{ID: t.ID}
 	log.Printf("reading task %d report", report.ID)
@@ -47,9 +50,11 @@ type Cron struct {
 
 func (c Cron) parseLine(index int, line string) *Task {
 	e := strings.Fields(line)
+	sched := strings.Join(e[:5], " ")
 	return &Task{
 		ID:       index,
-		Schedule: strings.Join(e[:5], " "),
+		Schedule: sched,
+		NextRun:  cronexpr.MustParse(sched).Next(time.Now()),
 		Command:  strings.Join(e[5:], " "),
 	}
 }
@@ -78,8 +83,8 @@ func (c *Cron) Parse() {
 	c.Count = len(c.Tasks)
 }
 
+// ParseReport walks through cache dir and parse existing execution report
 func (c *Cron) ParseReport() {
-	// TODO: use dir walkthrough instead of walkthrough tasks
 	cacheDir := utils.GetCacheDir()
 	log.Printf("GOAT_CACHE_DIR=%s", cacheDir)
 	dirs, err := utils.LsDir(cacheDir)
@@ -90,7 +95,6 @@ func (c *Cron) ParseReport() {
 	log.Printf("Got tasks as following:")
 	log.Println(dirs)
 	for _, t := range dirs {
-		// log.Printf("loading task [%s] report", t)
 		taskID, err := strconv.Atoi(t)
 		if err != nil {
 			log.Printf("failed to covert %s to int", t)
@@ -130,7 +134,8 @@ func (c *Cron) SetHost(hostname ...string) {
 	log.Printf("Set Host to %s", c.Host)
 }
 
-func (c Cron) FindTaskById(id int) *Task {
+// FindTaskByID returns the task pointer with specified task id
+func (c Cron) FindTaskByID(id int) *Task {
 	for _, task := range c.Tasks {
 		if task.ID == id {
 			return task
