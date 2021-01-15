@@ -19,6 +19,7 @@ const (
 	INVALID_PARAMS = 400
 	NOT_AUTHORIED  = 403
 	NOT_FOUND      = 404
+	ALREADY_EXIST  = 409
 )
 
 var Msg = map[int]string{
@@ -28,6 +29,7 @@ var Msg = map[int]string{
 	INVALID_PARAMS: "Invalid Parameters",
 	NOT_AUTHORIED:  "Client Not Authorized",
 	NOT_FOUND:      "Resource Not Found",
+	ALREADY_EXIST:  "Resource Already Exist",
 }
 
 // GetMsg returns the message to corresponding error code

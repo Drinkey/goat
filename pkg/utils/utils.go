@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"log"
 	"os"
@@ -85,4 +86,10 @@ func GetCacheDir() string {
 		return "/tmp/goat"
 	}
 	return d
+}
+
+// Sha256Sum use SHA256 hash function to digest the input string and return the hash string
+func Sha256Sum(input string) string {
+	shaSum := sha256.Sum256([]byte(input))
+	return fmt.Sprintf("%x", shaSum)
 }

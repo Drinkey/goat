@@ -5,13 +5,15 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/Drinkey/goat/commando"
+	"github.com/Drinkey/goat/cron"
+	"github.com/Drinkey/goat/pkg/utils"
+	"github.com/Drinkey/goat/report"
 )
 
-func runCommand(command string, setStatus *commando.Status) ([]byte, error) {
+func runCommand(command string, report *report.Report) ([]byte, error) {
 	log.Printf("start to run command %s", command)
-	setStatus.Running()
-	defer setStatus.Done()
+	report.Status.SetRunning()
+	defer report.Status.SetDone()
 
 	commandArgs := strings.Fields(command)
 	cmd := exec.Command(commandArgs[0], commandArgs[1:]...)
@@ -24,31 +26,39 @@ func runCommand(command string, setStatus *commando.Status) ([]byte, error) {
 	return output, nil
 }
 
-func Execute(id int, cmd string) {
+func Execute(id int, t *cron.Task) {
 	log.SetPrefix("services::Execute - ")
-	p := commando.Files{ID: id}
-	p.Load()
-	p.CreateDir()
-	setStatus, setResult := commando.Status{Path: p, ID: id}, commando.Result{Path: p, ID: id}
 
-	setStatus.Created()
-	setResult.NotRun()
+	log.Printf("creating report for task %d", id)
+	report := report.Report{ID: id}
 
-	r, err := runCommand(cmd, &setStatus)
+	report.New()
+
+	checksum := utils.Sha256Sum(t.Schedule + " " + t.Command)
+	report.Checksum.Save(checksum)
+
+	report.Status.SetCreated()
+	report.Result.SetNotRun()
+
+	r, err := runCommand(t.Command, &report)
 	if err == nil {
-		setResult.Pass()
+		report.Result.SetPass()
 	} else {
-		setResult.Fail()
+		report.Result.SetFail()
 	}
-	setResult.SaveLastLog(r)
+	log.Printf("Location: %s", report.Path.Log)
+	report.Log.Save(r)
+	log.Printf("-- task %d execution completed", id)
 }
 
-func GetTaskStatusAndResult(id int) *commando.Report {
-	log.SetPrefix("services::GetTaskStatusAndResult - ")
-	report := commando.Report{ID: id}
-	t := report.Load()
-	if t == commando.ErrTaskReportNotExist {
+func GetTask(id int) *report.Report {
+	log.SetPrefix("services::GetTask - ")
+	log.Print("----")
+	log.Printf("Loading task %d report", id)
+	r := report.Report{ID: id}
+	t := r.Load()
+	if t == report.ErrTaskReportNotExist {
 		return nil
 	}
-	return &report
+	return &r
 }

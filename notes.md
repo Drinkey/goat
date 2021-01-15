@@ -28,7 +28,7 @@ Commando: Task executor
 
 ### task execution solution
 
-How to store the result?
+How to store the result? Use a file aggregation to represent execution report.
 - Use `/tmp/goat/[id]/status` to store execution status
   - FSM: created -> running -> done, one direction
 - Use `/tmp/goat/[id]/lastresult` to store execution result of last run, default to `Not Run` when first created
@@ -66,7 +66,7 @@ The task a user want to run is `po_ad2` but after the change, the actual command
 
 ## API Level
 - [x] View existing cron jobs in fields -> Cron
-- [x] The view should return the latest content of crontab, this means n calls to open cronfile to response n API calls
+- [x] The view should return the latest content of crontab, this means n calls to open cron file to response n API calls
 - [x] Trigger task execution -> Commando
 - [x] View last triggered job result, pass/fail -> Commando
 
