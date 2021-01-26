@@ -94,8 +94,15 @@ func (c *Cron) Parse() {
 	log.Printf("Parsing cron file %s", c.File)
 	content, err := ioutil.ReadFile(c.File)
 	if err != nil {
-		log.Panicf("failed to read cron file %s: %s", c.File, err.Error())
+		log.Printf("failed to read cron file %s: %s", c.File, err.Error())
+		log.Print("failover to use command to get crontab")
+		content, err = exec.Command("crontab", "-l").Output()
+		if err != nil {
+			log.Printf("crontab -l returns error: %s", err.Error())
+			log.Panic("neither command or reading file can retrieve cron jobs")
+		}
 	}
+
 	c.Tasks = c.parseCronTab(content)
 	c.Count = len(c.Tasks)
 }
