@@ -10,7 +10,7 @@ import (
 func main() {
 	apiServerHandler := routers.InitRouter()
 	apiServer := &http.Server{
-		Addr:    ":80",
+		Addr:    ":8090",
 		Handler: apiServerHandler,
 	}
 	err := apiServer.ListenAndServe()

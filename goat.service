@@ -1,0 +1,9 @@
+Description= instance to serve goat api
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+ExecStart=/usr/local/bin/goat
+[Install]
+WantedBy=multi-user.target
