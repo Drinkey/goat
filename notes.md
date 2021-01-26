@@ -13,7 +13,7 @@ Cron: cron info parsing
 
 New
 
-- [ ] Support task change detection
+- [x] Support task change detection
 - [ ] Delete task report once task has changed, treat it as a new task
 
 Commando: Task executor
