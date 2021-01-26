@@ -30,6 +30,7 @@ func ListCronTasks(c *gin.Context) {
 	a := app.GoatResponse{Context: c}
 	if err := cron.CronTab.GetReportIDs(); err != nil {
 		a.Response(http.StatusInternalServerError, app.ERROR, err.Error())
+		return
 	}
 	cron.CronTab.Parse()
 	a.Response(http.StatusOK, app.SUCCESS, cron.CronTab)
