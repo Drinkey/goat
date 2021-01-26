@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const cronFileDir = "/var/spool/cron/crontabs"
+
 // DirUpLevel returns dir name of upper `level`
 func DirUpLevel(p string, level int) string {
 	if level > 0 {
@@ -21,7 +23,7 @@ func DirUpLevel(p string, level int) string {
 func GetCronFilePath(user string) string {
 	f := os.Getenv("CRON_FILE_PATH")
 	if f == "" {
-		return fmt.Sprintf("/var/spool/cron/%s", user)
+		return fmt.Sprintf("%s/%s", cronFileDir, user)
 	}
 	return f
 }

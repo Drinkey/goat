@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -13,14 +14,13 @@ import (
 	"github.com/gorhill/cronexpr"
 )
 
-const cronFileDir = "/var/spool/cron/crontabs"
-
 // CronTab is a global singleton object
 var CronTab Cron
 
 // Task represents one task of crontab
 type Task struct {
 	ID        int            `json:"id"`
+	Title     string         `json:"title"`
 	Schedule  string         `json:"schedule"`
 	Command   string         `json:"command"`
 	NextRun   time.Time      `json:"next_run"`
@@ -56,11 +56,19 @@ type Cron struct {
 	File      string       `json:"-"`
 }
 
-func (c Cron) parseLine(index int, line string) *Task {
+func (c Cron) parseLine(index int, line string, lastline string) *Task {
 	e := strings.Fields(line)
 	sched := strings.Join(e[:5], " ")
+	title := ""
+	// Title must be the lastline with format "# xxx", xxx will be title
+	if strings.Index(lastline, "# ") == 0 {
+		title = strings.Replace(lastline, "# ", "", 1)
+	} else {
+		log.Printf("unrecognized title format: %s", lastline)
+	}
 	return &Task{
 		ID:       index,
+		Title:    title,
 		Schedule: sched,
 		NextRun:  cronexpr.MustParse(sched).Next(time.Now()),
 		Command:  strings.Join(e[5:], " "),
@@ -70,20 +78,26 @@ func (c Cron) parseLine(index int, line string) *Task {
 
 func (c Cron) parseCronTab(content []byte) []*Task {
 	t := []*Task{}
-	for _, line := range strings.Split(string(content), "\n") {
+	lines := strings.Split(string(content), "\n")
+	for i, line := range lines {
 		if strings.Index(line, "#") == 0 || len(line) == 0 {
 			// skip useless lines
 			continue
 		}
 		index := len(t) + 1
-		task := c.parseLine(index, line)
+		var task *Task
+		if i > 0 {
+			task = c.parseLine(index, line, lines[i-1])
+		} else {
+			task = c.parseLine(index, line, "")
+		}
+
 		if _, ok := c.reportIDs[len(t)+1]; ok {
 			log.Printf("report for task %d exist, read it", index)
 			task.Load()
 		} else {
 			task.Report = nil
 		}
-		// log.Println(task)
 		t = append(t, task)
 	}
 	return t
@@ -185,4 +199,13 @@ func init() {
 	CronTab = Cron{User: u, File: cronFile}
 	CronTab.SetHost()
 	CronTab.SetTimeZone()
+
+	// create cache dir if not exist
+	cache := utils.GetCacheDir()
+	if !utils.IsDirExist(cache) {
+		log.Printf("cache dir %s does not exist, create it", cache)
+		if err := os.MkdirAll(cache, 0700); err != nil {
+			log.Panicf("failed to create cache dir %s", cache)
+		}
+	}
 }
