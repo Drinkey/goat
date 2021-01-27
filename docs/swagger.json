@@ -1,0 +1,248 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "GoAt API Document. Please notice the responses described in this document is response \"data\" field's value, not the real response",
+        "title": "GoAt API Document",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8090",
+    "basePath": "/api/v1",
+    "paths": {
+        "/api/v1/cron": {
+            "get": {
+                "description": "List all cron tasks of the running host with execution status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cron"
+                ],
+                "summary": "List all cron tasks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/cron.Cron"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cron/{id}": {
+            "get": {
+                "description": "Get execution status of task by specified ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cron"
+                ],
+                "summary": "Get execution status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get the task success",
+                        "schema": {
+                            "$ref": "#/definitions/report.Report"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Task report not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Run a task by specified ID for once",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cron"
+                ],
+                "summary": "Run a task by specified ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Start task success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Task already running",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ping": {
+            "get": {
+                "description": "probing",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Response to service probing",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "cron.Cron": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "type": "string"
+                },
+                "task_count": {
+                    "type": "integer"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/cron.Task"
+                    }
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "cron.Task": {
+            "type": "object",
+            "properties": {
+                "checksum": {
+                    "type": "string"
+                },
+                "command": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_changed_since_lastrun": {
+                    "type": "boolean"
+                },
+                "next_run": {
+                    "type": "string"
+                },
+                "report": {
+                    "$ref": "#/definitions/report.Report"
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.Checksum": {
+            "type": "object",
+            "properties": {
+                "sha256sum": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.Log": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "log_path": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.Report": {
+            "type": "object",
+            "properties": {
+                "checksum": {
+                    "$ref": "#/definitions/report.Checksum"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "log": {
+                    "$ref": "#/definitions/report.Log"
+                },
+                "result": {
+                    "$ref": "#/definitions/report.Result"
+                },
+                "status": {
+                    "$ref": "#/definitions/report.Status"
+                }
+            }
+        },
+        "report.Result": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.Status": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

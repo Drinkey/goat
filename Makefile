@@ -7,6 +7,9 @@ swagger:
 build:
 	export GOARCH=amd64 && export CGO_ENABLED=1 && go build -v -o goat-linux-amd64
 
+build-mac:
+	export GOARCH=amd64 && go build -v -o goat-darwin-amd64
+
 install:
 	cp goat-linux-amd64 /usr/local/bin/goat && chmod +x /usr/local/bin/goat
 	cp goat.service /etc/systemd/system/goat.service

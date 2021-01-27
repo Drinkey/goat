@@ -18,13 +18,21 @@ import (
 // @Summary Response to service probing
 // @Description probing
 // @Produce json
-// @Success 200 {string} string "ok" "PONG"
+// @Success 200 {string} string ok PONG
 // @Router /api/v1/ping [get]
 func Ping(c *gin.Context) {
 	a := app.GoatResponse{Context: c}
 	a.Response(http.StatusOK, app.SUCCESS, "PONG")
 }
 
+// ListCronTasks List all cron tasks of the host with execution status
+// @Summary List all cron tasks
+// @Description  List all cron tasks of the running host with execution status
+// @Tags Cron
+// @Produce json
+// @Success 200 {object} cron.Cron cronjobs
+// @Failure 500 {string} string "error message"
+// @Router /api/v1/cron [get]
 func ListCronTasks(c *gin.Context) {
 
 	a := app.GoatResponse{Context: c}
@@ -36,6 +44,16 @@ func ListCronTasks(c *gin.Context) {
 	a.Response(http.StatusOK, app.SUCCESS, cron.CronTab)
 }
 
+// RunOneTask runs a task by specified ID
+// @Summary Run a task by specified ID
+// @Description Run a task by specified ID for once
+// @Tags Cron
+// @Produce json
+// @Param  id path int true "Task ID"
+// @Success 200 {object} string "Start task success"
+// @Failure 400 {string} string "Invalid Request"
+// @Failure 409 {string} string "Task already running"
+// @Router /api/v1/cron/{id} [post]
 func RunOneTask(c *gin.Context) {
 	a := app.GoatResponse{Context: c}
 	id, err := strconv.Atoi(c.Param("id"))
@@ -60,6 +78,16 @@ func RunOneTask(c *gin.Context) {
 	a.Response(http.StatusCreated, app.CREATED, msg)
 }
 
+// GetOneTask responses task execution status of task by specified ID
+// @Summary Get execution status
+// @Description Get execution status of task by specified ID
+// @Tags Cron
+// @Produce json
+// @Param  id path int true "Task ID"
+// @Success 200 {object} report.Report "Get the task success"
+// @Failure 400 {string} string "Bad request"
+// @Failure 404 {string} string "Task report not found"
+// @Router /api/v1/cron/{id} [get]
 func GetOneTask(c *gin.Context) {
 	a := app.GoatResponse{Context: c}
 	id, err := strconv.Atoi(c.Param("id"))
