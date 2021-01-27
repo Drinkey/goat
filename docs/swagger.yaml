@@ -75,7 +75,7 @@ host: localhost:8090
 info:
   contact: {}
   description: GoAt API Document. Please notice the responses described in this document
-    is response "data" field's value, not the real response
+    is response data field value, not the real response
   title: GoAt API Document
   version: "1.0"
 paths:

@@ -278,7 +278,7 @@ var SwaggerInfo = swaggerInfo{
 	BasePath:    "/api/v1",
 	Schemes:     []string{},
 	Title:       "GoAt API Document",
-	Description: "GoAt API Document. Please notice the responses described in this document is response \"data\" field's value, not the real response",
+	Description: "GoAt API Document. Please notice the responses described in this document is response data field value, not the real response",
 }
 
 type s struct{}
