@@ -5,10 +5,22 @@ swagger:
 	swag init -g goat.go
 
 build:
-	export GOARCH=amd64 && export CGO_ENABLED=1 && go build -v -o goat-linux-amd64
+	export GOARCH=amd64
+	export GOOS=linux
+	export CGO_ENABLED=1
+	go build -v -o goat-linux-amd64
+
+build-release:
+	export GOARCH=amd64
+	export GOOS=linux
+	export CGO_ENABLED=1
+	go build -v -o goat-linux-amd64
+	tar zcvf goat-`git tag |sort|tail -n1`-linux-amd64.tar.gz goat-linux-amd64
 
 build-mac:
-	export GOARCH=amd64 && go build -v -o goat-darwin-amd64
+	export GOARCH=amd64
+	export GOOS=darwin
+	go build -v -o goat-darwin-amd64
 
 install:
 	cp goat-linux-amd64 /usr/local/bin/goat && chmod +x /usr/local/bin/goat
