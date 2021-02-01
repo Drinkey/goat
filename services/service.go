@@ -10,6 +10,20 @@ import (
 	"github.com/Drinkey/goat/report"
 )
 
+func GetTask(id int) *cron.Task {
+	cron.CronTab.Parse()
+	task := cron.CronTab.FindTaskByID(id)
+	if task == nil {
+		return nil
+	}
+	task.Load()
+	return task
+}
+
+func IsTaskRunning(task *cron.Task) bool {
+	return task.Report != nil && task.Report.Status.Status == report.RUNNING
+}
+
 func runCommand(command string, report *report.Report) ([]byte, error) {
 	log.Printf("start to run command %s", command)
 	report.Status.SetRunning()
@@ -51,7 +65,7 @@ func Execute(id int, t *cron.Task) {
 	log.Printf("-- task %d execution completed", id)
 }
 
-func GetTask(id int) *report.Report {
+func GetTaskReport(id int) *report.Report {
 	log.SetPrefix("services::GetTask - ")
 	log.Print("----")
 	log.Printf("Loading task %d report", id)

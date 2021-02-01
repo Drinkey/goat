@@ -10,7 +10,6 @@ import (
 
 	"github.com/Drinkey/goat/cron"
 	"github.com/Drinkey/goat/pkg/app"
-	"github.com/Drinkey/goat/report"
 	"github.com/Drinkey/goat/services"
 )
 
@@ -61,19 +60,26 @@ func RunOneTask(c *gin.Context) {
 		a.Response(http.StatusBadRequest, app.INVALID_PARAMS, "id should be int")
 		return
 	}
-	cron.CronTab.Parse()
-	task := cron.CronTab.FindTaskByID(id)
-	task.Load()
-	if task.Report != nil && task.Report.Status.Status == report.RUNNING {
+	task := services.GetTask(id)
+	if task == nil {
+		m := fmt.Sprintf("failed to find task by task id %d, task not exist", id)
+		log.Print(m)
+		a.Response(http.StatusNotFound, app.NOT_FOUND, m)
+		return
+	}
+
+	if services.IsTaskRunning(task) {
 		m := fmt.Sprintf("task %d is already running, will not run it again, query /cron/:id for details", id)
 		log.Printf(m)
 		a.Response(http.StatusConflict, app.ALREADY_EXIST, m)
 		return
 	}
+
 	go func() {
 		log.Print("task created")
 		services.Execute(id, task)
 	}()
+
 	msg := fmt.Sprintf("task %d start to run, query /cron/:id for details", id)
 	a.Response(http.StatusCreated, app.CREATED, msg)
 }
@@ -96,7 +102,7 @@ func GetOneTask(c *gin.Context) {
 		return
 	}
 
-	report := services.GetTask(id)
+	report := services.GetTaskReport(id)
 	if report == nil {
 		a.Response(http.StatusNotFound, app.NOT_FOUND,
 			fmt.Sprintf("report for task %d not found", id))

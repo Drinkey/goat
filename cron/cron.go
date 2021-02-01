@@ -40,7 +40,7 @@ func (t *Task) Load() {
 		return
 	}
 	t.Report = r
-	log.Printf("my checksum %s, report checksum %s", t.Checksum, r.Checksum.Sha256sum)
+	log.Printf("Current checksum %s, previous report checksum %s", t.Checksum, r.Checksum.Sha256sum)
 	t.IsChanged = !(t.Checksum == r.Checksum.Sha256sum)
 	log.Printf("IsChanged=%t", t.IsChanged)
 }
