@@ -66,7 +66,7 @@ func Execute(id int, t *cron.Task) {
 }
 
 func GetTaskReport(id int) *report.Report {
-	log.SetPrefix("services::GetTask - ")
+	log.SetPrefix("services::GetTaskReport - ")
 	log.Print("----")
 	log.Printf("Loading task %d report", id)
 	r := report.Report{ID: id}
