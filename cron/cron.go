@@ -45,6 +45,13 @@ func (t *Task) Load() {
 	log.Printf("IsChanged=%t", t.IsChanged)
 }
 
+const (
+	// StandardSchedFieldIndex is standard scheduling field index
+	StandardSchedFieldIndex = 5
+	// NonStandardSchedFieldIndex is nonstandard predefined scheduling field index
+	NonStandardSchedFieldIndex = 1
+)
+
 // Cron represents the info of crontab
 type Cron struct {
 	Host      string       `json:"host"`
@@ -58,20 +65,22 @@ type Cron struct {
 
 func (c Cron) parseSchedule(line string) (schedule, command string) {
 	e := strings.Fields(line)
+	index := StandardSchedFieldIndex
 	if strings.Index(e[0], "@") == 0 {
 		// Nonstandard predefined scheduling
 		schedule = e[0]
-		command = strings.Join(e[1:], " ")
+		index = NonStandardSchedFieldIndex
 	} else {
 		// Standard scheduling
-		schedule = strings.Join(e[:5], " ")
-		strings.Join(e[5:], " ")
+		schedule = strings.Join(e[:index], " ")
 	}
+	command = strings.Join(e[index:], " ")
 	return
 }
 
 func (c Cron) parseLine(index int, line string, lastline string) *Task {
 	sched, command := c.parseSchedule(line)
+	log.Printf("id=%d, schedule=%s, command=%s", index, sched, command)
 	title := ""
 	// Title must be the lastline with format "# xxx", xxx will be title
 	if strings.Index(lastline, "# ") == 0 {

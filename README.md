@@ -31,7 +31,7 @@ GO At manages cron jobs of running machine and support view and run via RESTFul 
 ## Service
 1. Use `sudo systemctl start goat` to start service
 2. Use RESTFul API to access the service
-3. Swagger document available at http://\<ip\>:8090/api/v1/swagger/index.html
+3. Swagger document is available at http://\<ip_or_hostname\>:8090/api/v1/swagger/index.html
 
 ## crontab configuration
 
