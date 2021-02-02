@@ -56,9 +56,22 @@ type Cron struct {
 	File      string       `json:"-"`
 }
 
-func (c Cron) parseLine(index int, line string, lastline string) *Task {
+func (c Cron) parseSchedule(line string) (schedule, command string) {
 	e := strings.Fields(line)
-	sched := strings.Join(e[:5], " ")
+	if strings.Index(e[0], "@") == 0 {
+		// Nonstandard predefined scheduling
+		schedule = e[0]
+		command = strings.Join(e[1:], " ")
+	} else {
+		// Standard scheduling
+		schedule = strings.Join(e[:5], " ")
+		strings.Join(e[5:], " ")
+	}
+	return
+}
+
+func (c Cron) parseLine(index int, line string, lastline string) *Task {
+	sched, command := c.parseSchedule(line)
 	title := ""
 	// Title must be the lastline with format "# xxx", xxx will be title
 	if strings.Index(lastline, "# ") == 0 {
@@ -71,7 +84,7 @@ func (c Cron) parseLine(index int, line string, lastline string) *Task {
 		Title:    title,
 		Schedule: sched,
 		NextRun:  cronexpr.MustParse(sched).Next(time.Now()),
-		Command:  strings.Join(e[5:], " "),
+		Command:  command,
 		Checksum: utils.Sha256Sum(line),
 	}
 }

@@ -51,3 +51,6 @@
 
 # Sleep for 5 secs
 0 13 * * * sleep 5
+
+# Test Nonstandard cron: Sleep 10 sec every day
+@daily sleep 10
