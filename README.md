@@ -39,13 +39,13 @@ To have better maintainability to your cron jobs, it is recommended to have comm
 
 For example, if you have only one cron task:
 ```
-02 14 * * * python3 -u /home/example/thg/scripts/uid.py >> /tmp/uid.log 2>&1
+02 14 * * * python3 -u /home/example/thg/scripts/uid.py
 ```
 
 Add a comment prior to this line as the title
 ```
 # Update whatever info 2:02PM every day
-02 14 * * * python3 -u /home/example/thg/scripts/uid.py >> /tmp/uid.log 2>&1
+02 14 * * * python3 -u /home/example/thg/scripts/uid.py
 ```
 
 **Please use exactly `# ` (# and one space)at the beginning of comment line**. `goat` will understand it as the cron task title.
@@ -54,7 +54,9 @@ Add a comment prior to this line as the title
 
 ## Task command definition
 
-`os.exec` would use the first parameter to find executable in `$PATH`. If the first word of `command` is not executable in `$PATH`, this will trigger error.
+`os/exec` would use the first parameter to find executable in `$PATH`. If the first word of `command` is not executable in `$PATH`, this will trigger error.
+
+And if your command contains `&&`, `|`, `;`, `>`, `>>`, or other symbols in shell command line, the execution will fail. The solution is wrap the commands like this in a shell script and call the shell script in crontab.
 
 # Development
 
