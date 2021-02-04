@@ -69,7 +69,12 @@ func (c *Result) getModificationTime() error {
 		log.Printf("failed to stat last result for last update time")
 		return err
 	}
-	c.Time = stat.ModTime()
+	t := stat.ModTime().Format(time.RFC3339)
+	c.Time, err = time.Parse(time.RFC3339, t)
+	if err != nil {
+		log.Printf("[taskID=%d] parse modification time=%s error: %s", c.ID, c.Time, err.Error())
+		return err
+	}
 	log.Printf("[taskID=%d] got last result modification time: %s", c.ID, c.Time)
 	return nil
 }

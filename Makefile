@@ -5,10 +5,8 @@ swagger:
 	swag init -g goat.go
 
 build:
-	export GOARCH=amd64
-	export GOOS=linux
-	export CGO_ENABLED=1
-	go build -v -o goat-linux-amd64
+	docker run --rm -v "$(PWD)":/usr/src/goat -w /usr/src/goat -e GOOS=linux -e GOARCH=amd64 -e CGO_ENABLED=1 goat:latest go build -v -o goat-linux-amd64
+	tar zcvf goat-linux-amd64.tar.gz goat-linux-amd64
 
 build-release:
 	export GOARCH=amd64
